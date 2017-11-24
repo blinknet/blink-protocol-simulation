@@ -3,38 +3,38 @@
 #include "utils.hpp"
 #include "globals.hpp"
 
-
-long long rand_long(long long limit) {
+long long RandLong(long long limit) {
     return (static_cast<long long>(rand()) * RAND_MAX + rand()) % limit;
 }
 
-int rand_int(int limit) {
+double Rand01() {
+    return ((double) RandLong(static_cast<long long>(RAND_MAX) * RAND_MAX) / (static_cast<long long>(RAND_MAX) * RAND_MAX));
+}
+
+int RandInt(int limit) {
     if (limit > RAND_MAX) {
-        return static_cast<int>(rand_long(limit));
+        return static_cast<int>(RandLong(limit));
     }
     return rand() % limit;
 }
-double rand01() {
-    return ((double) rand_long(static_cast<long long>(RAND_MAX) * RAND_MAX) / (static_cast<long long>(RAND_MAX) * RAND_MAX));
-}
 
-const double poisson_constant = exp(-5.0);
+const double kPoissonConstant = exp(-5.0);
 
-int poisson_number() {
+int PoissonNumber() {
     double p = 1; int k = 0;
     do {
-        p *= rand01();
+        p *= Rand01();
         k += 1;
-    } while (p > poisson_constant);
+    } while (p > kPoissonConstant);
     return k - 1;
 }
 
-double latency_distribution() {
-    return 1.0 + 0.15 * (poisson_number() - 4);
+double LatencyDistribution() {
+    return 1.0 + 0.15 * (PoissonNumber() - 4);
 }
 
-std::pair<long long, std::pair<double, double>> random_city() {
-    long long population = rand_long(cities.back().first);
+std::pair<long long, std::pair<double, double>> RandomCity() {
+    long long population = RandLong(cities.back().first);
     // A binary search here
     int left = 0, right = cities.size() - 1, city_index = -1;
     while (left <= right) {
@@ -49,11 +49,11 @@ std::pair<long long, std::pair<double, double>> random_city() {
     return cities[city_index];
 }
 
-double deg_to_rad(double deg) {
+double DegToRad(double deg) {
     return deg / 180.0 * M_PI;
 }
 
-std::string get_log_folder_name() {
+std::string GetLogFolderName() {
     std::string folder_name;
     folder_name += "n=" + std::to_string(num_nodes) + ",";
     folder_name += "k=" + std::to_string(gossip_factor) + ",";
@@ -64,10 +64,10 @@ std::string get_log_folder_name() {
 }
 
 // Log file path, relative to project root
-std::string get_log_file_path() {
+std::string GetLogFilePath() {
     std::vector<std::string> folders = {
             "logs",
-            get_log_folder_name()
+            GetLogFolderName()
     };
 
     std::string path;

@@ -1,6 +1,19 @@
 logs/
 logs - backup/
+
 Plot/cities.csv
+
 .idea/
+
 cmake-build-debug/
 cmake-build/
+
+data/
+
+# Linux
+CMakeFiles/
+cmake_install.cmake
+CMakeCache.txt
+Makefile
+
+liquidity_sim

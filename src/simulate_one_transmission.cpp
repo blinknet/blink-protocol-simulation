@@ -1,44 +1,60 @@
-#include <vector>
-#include <iostream>
+#include <algorithm>
 #include <fstream>
+#include <iostream>
 
 #include "utils.hpp"
 #include "node.hpp"
-#include "globals.hpp"
 #include "input.hpp"
+#include "globals.hpp"
 
 
-void run_simulation(int transmissions=1) {
-    for (int i = 1; i <= transmissions; ++ i) {
-        int start_node_index;
-        do {
-            start_node_index = rand_int(num_nodes);
-        } while (nodes[start_node_index].is_corrupt());
-
-        time_line.push(
-                Event(
-                        start_node_index,
-                        start_node_index,
-                        i,
-                        (i - 1) * 1000.0,
-                        Event::EventType::BROADCAST
-                )
-        );
+void RunSimulation(std::vector<double> &dist, const std::vector<Node> &nodes) {
+    std::vector<bool> used(num_nodes, false);
+    std::vector<std::pair<double, int>> q;
+    std::vector<int> targets(gossip_factor, 0);
+    int start_node = RandInt(num_nodes);
+    q.push_back({0, start_node});
+    dist[start_node] = 0;
+    while (!q.empty()) {
+        int node = q.front().second;
+        std::pop_heap(q.begin(), q.end(), std::greater<std::pair<double, int>>());
+        q.pop_back();
+        if (nodes[node].IsCorrupt() && node != start_node) {
+            continue;
+        }
+        for (int x, j = 0; j < gossip_factor; ++j) {
+            do {
+                x = RandInt(num_nodes);
+            } while (used[x]);
+            targets[j] = x;
+            used[x] = true;
+        }
+        for (int j = 0; j < gossip_factor; ++j) {
+            used[targets[j]] = false;
+        }
+        for (int x : targets) {
+            const auto d = nodes[x].BroadcastDuration(nodes[node]);
+            if (dist[x] > dist[node] + d) {
+                dist[x] = dist[node] + d;
+                q.push_back({dist[x], x});
+                std::push_heap(q.begin(), q.end(), std::greater<std::pair<double, int>>());
+            }
+        }
     }
-
-    while (!time_line.empty()) {
-        time_line.apply_first();
-    }
+    std::sort(dist.begin(), dist.end());
 }
 
-
 int main(int argc, char* argv[]) {
-    read_data();
+    ReadData();
 
-    const int TRANSMISSIONS = 1;
-
-    std::ofstream log_file("../transmission.csv");
-    log_file << "50%,66%,75%,90%,99%,100%" << std::endl;
+    std::ofstream log_file(GetLogFilePath().c_str());
+    std::cout << GetLogFilePath() << std::endl;
+    log_file << num_nodes << ","
+             << gossip_factor << ","
+             << corruption_chance * 100 << "%,"
+             << computing_time << ","
+             << latency
+             << std::endl;
 
     std::vector<double> total(num_nodes);
     std::vector<int> times_reached(num_nodes);
@@ -52,16 +68,11 @@ int main(int argc, char* argv[]) {
             {{       num_nodes - 1, "100%"}, false}
     };
     for (int steps = 1; steps <= 2e9; ++ steps) {
+        std::vector<double> current(num_nodes, 1e20);
         for (int i = 0; i < num_nodes; ++ i) {
-            nodes[i].reset(corruption_chance);
+            nodes[i].Reset(corruption_chance);
         }
-        run_simulation(TRANSMISSIONS);
-
-        std::vector<double> current(num_nodes);
-        for(int i = 0; i < num_nodes; i += 1) {
-            current[i] = nodes[i].received_version(TRANSMISSIONS) ? nodes[i].get_version_receive_time(TRANSMISSIONS) : 1e20;
-        }
-
+        RunSimulation(current, nodes);
         for (int i = 0; i < num_nodes; ++ i) {
             if (current[i] < 1e20) {
                 total[i] += current[i];

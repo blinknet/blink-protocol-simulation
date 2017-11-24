@@ -2,14 +2,15 @@
 
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 #include "globals.hpp"
 
 // TODO: CHANGE THIS TO CONFIG FILE PARSING
 
-void read_data() {
+void ReadData() {
     // TODO: Change for compatibility with Linux / VIM
-    const std::string CITIES_FILE_PATH = "../cities.txt";
+    const std::string kCitiesFilePath = "data/cities.txt";
 
     std::cout << "Use default values? (nodes=10,000; gossip=16; corrupt=10%; computing time=20ms; latency=100ms) [Y/n]";
     char answer;
@@ -34,7 +35,7 @@ void read_data() {
     }
 
     std::cout << "Reading city list..." << std::endl;
-    std::ifstream cities_file(CITIES_FILE_PATH.c_str());
+    std::ifstream cities_file(kCitiesFilePath.c_str());
     int num_empty_cities = 0;
     int city_population;
     double city_longitude;

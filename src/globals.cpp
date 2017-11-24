@@ -9,4 +9,3 @@ size_t gossip_factor;
 
 std::vector<std::pair<long long, std::pair<double, double>>> cities;
 std::vector<Node> nodes;
-//EventQueue time_line;
