@@ -1,3 +1,5 @@
+#include <ctime>
+
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -6,38 +8,45 @@
 #include "node.hpp"
 #include "input.hpp"
 #include "globals.hpp"
+#include "heap.hpp"
 
+
+void choose_targets(int node, std::vector<int> &targets, std::vector<bool> &used) {
+    used[node] = true;
+    for (int x, i = 0; i < gossip_factor; ++i) {
+        do {
+            x = RandInt(num_nodes);
+        } while (used[x]);
+        targets[i] = x;
+        used[x] = true;
+    }
+    for (int i = 0; i < gossip_factor; ++ i) {
+        used[targets[i]] = false;
+    }
+    used[node] = false;
+}
 
 void RunSimulation(std::vector<double> &dist, const std::vector<Node> &nodes) {
     std::vector<bool> used(num_nodes, false);
-    std::vector<std::pair<double, int>> q;
     std::vector<int> targets(gossip_factor, 0);
+
+    DijkstraHeap q(num_nodes);
+
     int start_node = RandInt(num_nodes);
-    q.push_back({0, start_node});
+    q.Push(0, start_node);
     dist[start_node] = 0;
-    while (!q.empty()) {
-        int node = q.front().second;
-        std::pop_heap(q.begin(), q.end(), std::greater<std::pair<double, int>>());
-        q.pop_back();
+
+    while (!q.Empty()) {
+        int node = q.Pop();
         if (nodes[node].IsCorrupt() && node != start_node) {
             continue;
         }
-        for (int x, j = 0; j < gossip_factor; ++j) {
-            do {
-                x = RandInt(num_nodes);
-            } while (used[x]);
-            targets[j] = x;
-            used[x] = true;
-        }
-        for (int j = 0; j < gossip_factor; ++j) {
-            used[targets[j]] = false;
-        }
+        choose_targets(node, targets, used);
         for (int x : targets) {
             const auto d = nodes[x].BroadcastDuration(nodes[node]);
             if (dist[x] > dist[node] + d) {
                 dist[x] = dist[node] + d;
-                q.push_back({dist[x], x});
-                std::push_heap(q.begin(), q.end(), std::greater<std::pair<double, int>>());
+                q.Push(dist[x], x);
             }
         }
     }
@@ -67,12 +76,19 @@ int main(int argc, char* argv[]) {
             {{0.99 * num_nodes - 1,  "99%"}, false},
             {{       num_nodes - 1, "100%"}, false}
     };
+
+    double total_time = 0;
+
     for (int steps = 1; steps <= 2e9; ++ steps) {
         std::vector<double> current(num_nodes, 1e20);
         for (int i = 0; i < num_nodes; ++ i) {
             nodes[i].Reset(corruption_chance);
         }
+
+        double start_time = clock();
         RunSimulation(current, nodes);
+        total_time += (clock() - start_time) / CLOCKS_PER_SEC;
+
         for (int i = 0; i < num_nodes; ++ i) {
             if (current[i] < 1e20) {
                 total[i] += current[i];
@@ -87,6 +103,7 @@ int main(int argc, char* argv[]) {
             std::cout << "Computing time for a transmission: " << computing_time << "ms\n";
             std::cout << "Latency to travel 6,371km (Earth Radius): " << latency << "ms\n";
             std::cout << "Simulation runs: " << steps << "\n";
+            std::cout << "Simulations total run time: " << total_time << "s\n";
         }
         bool first = true;
         for (auto &percent: percents) {
