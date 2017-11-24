@@ -19,24 +19,25 @@ void run_simulation(std::vector<double> &dist, const std::vector<Node> &nodes) {
         int node = q.front().second;
         std::pop_heap(q.begin(), q.end(), std::greater<std::pair<double, int>>());
         q.pop_back();
-        if (!nodes[node].is_corrupt() || node == start_node) {
-            for (int x, j = 0; j < gossip_factor; ++j) {
-                do {
-                    x = rand_int(num_nodes);
-                } while (used[x]);
-                targets[j] = x;
-                used[x] = true;
-            }
-            for (int j = 0; j < gossip_factor; ++j) {
-                used[targets[j]] = false;
-            }
-            for (int x : targets) {
-                const auto d = nodes[x].broadcast_duration(nodes[node]);
-                if (dist[x] > dist[node] + d) {
-                    dist[x] = dist[node] + d;
-                    q.push_back({dist[x], x});
-                    std::push_heap(q.begin(), q.end(), std::greater<std::pair<double, int>>());
-                }
+        if (nodes[node].is_corrupt() && node != start_node) {
+            continue;
+        }
+        for (int x, j = 0; j < gossip_factor; ++j) {
+            do {
+                x = rand_int(num_nodes);
+            } while (used[x]);
+            targets[j] = x;
+            used[x] = true;
+        }
+        for (int j = 0; j < gossip_factor; ++j) {
+            used[targets[j]] = false;
+        }
+        for (int x : targets) {
+            const auto d = nodes[x].broadcast_duration(nodes[node]);
+            if (dist[x] > dist[node] + d) {
+                dist[x] = dist[node] + d;
+                q.push_back({dist[x], x});
+                std::push_heap(q.begin(), q.end(), std::greater<std::pair<double, int>>());
             }
         }
     }

@@ -3,16 +3,19 @@
 #include "utils.hpp"
 #include "globals.hpp"
 
-double rand01() {
-    return ((double) rand() / (RAND_MAX));
-}
-
-int rand_int(int limit) {
-    return rand() % limit;
-}
 
 long long rand_long(long long limit) {
     return (static_cast<long long>(rand()) * RAND_MAX + rand()) % limit;
+}
+
+int rand_int(int limit) {
+    if (limit > RAND_MAX) {
+        return static_cast<int>(rand_long(limit));
+    }
+    return rand() % limit;
+}
+double rand01() {
+    return ((double) rand_long(static_cast<long long>(RAND_MAX) * RAND_MAX) / (static_cast<long long>(RAND_MAX) * RAND_MAX));
 }
 
 const double poisson_constant = exp(-5.0);
