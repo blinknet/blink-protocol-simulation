@@ -3,5 +3,10 @@ project(liquidity_sim)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES src/simulate_one_transmission.cpp src/node.cpp src/input.cpp src/globals.cpp src/utils.cpp src/heap.cpp)
-add_executable(liquidity_sim ${SOURCE_FILES})
+file(GLOB SOURCE_FILES src/*.cpp)
+file(GLOB AUTOJSON_FILES src/third_party/autojson/src/lib/*.cpp src/third_party/autojson/src/lib/*.hpp)
+
+set(THIRD_PARTY_FILES ${AUTOJSON_FILES})
+set(ALL_SOURCE_FILES ${SOURCE_FILES} ${THIRD_PARTY_FILES})
+
+add_executable(${PROJECT_NAME} ${ALL_SOURCE_FILES})

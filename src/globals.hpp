@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <vector>
+#include <string>
 
 #include "node.hpp"
 
@@ -14,3 +15,5 @@ extern size_t gossip_factor;
 
 extern std::vector<std::pair<long long, std::pair<double, double>>> cities;
 extern std::vector<Node> nodes;
+
+extern std::string cities_file_path;

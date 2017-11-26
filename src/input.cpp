@@ -4,38 +4,30 @@
 #include <iostream>
 #include <vector>
 
+#include "third_party/autojson/src/lib/json.hpp"
+
 #include "globals.hpp"
 
-// TODO: CHANGE THIS TO CONFIG FILE PARSING
+const std::string kDefaultCitiesFilePath = "data/cities.txt";
+const int kDefautNumNodes = 10000;
+const int kDefaultGossipFactor = 16;
+const double kDefaultCorruptionChance = 0.1;
+const double kComputingTime = 20;
+const double kLatency = 100;
 
 void ReadData() {
-    // TODO: Change for compatibility with Linux / VIM
-    const std::string kCitiesFilePath = "data/cities.txt";
+    /// read JSON from file
+    AutoJson::Json config = AutoJson::Json::ReadFromFile("data/config.json");
 
-    std::cout << "Use default values? (nodes=10,000; gossip=16; corrupt=10%; computing time=20ms; latency=100ms) [Y/n]";
-    char answer;
-    std::cin.get(answer);
-    if (answer == 'N' || answer == 'n') {
-        std::cout << "Number of nodes: ";
-        std::cin >> num_nodes;
-        std::cout << "GossipFactor: ";
-        std::cin >> gossip_factor;
-        std::cout << "Chance for a node to be not transmit: ";
-        std::cin >> corruption_chance;
-        std::cout << "Computing time for a transmission: ";
-        std::cin >> computing_time;
-        std::cout << "Latency to travel 6,371km (Earth Radius): ";
-        std::cin >> latency;
-    } else {
-        num_nodes = 10000;
-        gossip_factor = 16;
-        corruption_chance = 0.1;
-        computing_time = 20;
-        latency = 100;
-    }
+    cities_file_path = (config["citiesFilePath"] | kDefaultCitiesFilePath).operator std::string();
+    num_nodes = config["numNodes"] | kDefautNumNodes;
+    gossip_factor = config["gossipFactor"] | kDefaultGossipFactor;
+    corruption_chance = config["corruptionChance"] | kDefaultCorruptionChance;
+    computing_time = config["computingTime"] | kComputingTime;
+    latency = config["latency"] | kLatency;
 
     std::cout << "Reading city list..." << std::endl;
-    std::ifstream cities_file(kCitiesFilePath.c_str());
+    std::ifstream cities_file(cities_file_path.c_str());
     int num_empty_cities = 0;
     int city_population;
     double city_longitude;
