@@ -1,12 +1,15 @@
-import os
+from os.path import dirname, realpath, join
+from os import listdir, makedirs
 import csv
+import re
 import time
 
 import matplotlib.pyplot as plt
 
 
 class Distribution:
-    def __init__(self):
+    def __init__(self, path):
+        self.path_to_save = path
         self.samples = []
         self.num_nodes = ""
         self.gossip_factor = ""
@@ -44,39 +47,57 @@ class Distribution:
         # plt.axis([min(samples) - 5, max(samples) + 5, 0, 100])
         plt.grid(True)
 
-        plt.savefig("plots/" + self.get_file_name() + ".png")
+        plt.savefig(join(self.path_to_save, self.percent + ".png"))
         plt.clf()
 
         return num_samples
 
 
-def get_data():
-    file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath('__file__'))), "transmission.csv")
-    f = open(str(file_path), "r")
+def get_data(path, n, k, c, t, l):
+    file_path = join(path, "data.csv")
+    try:
+        f = open(file_path, "r")
+    except:
+        return []
     reader = csv.reader(f, delimiter=",")
-    distributions = [Distribution() for _ in range(6)]
-    num_nodes, gossip_factor, corrupt, delay, latency = [""] * 5
+    distributions = [Distribution(path) for _ in range(6)]
     for i, row in enumerate(reader):
-        if i == 0:
-            num_nodes, gossip_factor, corrupt, delay, latency = row
-        else:
-            for j in range(6):
+        for j in range(6):
+            try:
                 distributions[j].add(float(row[j]))
+            except:
+                pass
     for i, percent in enumerate(["50%", "66%", "75%", "90%", "99%", "100%"]):
-        distributions[i].set_title_parts(num_nodes, gossip_factor, corrupt, delay, latency, percent)
+        distributions[i].set_title_parts(n, k, c, t, l, percent)
     return distributions
 
 
-def dump():
-    distributions = get_data()
-    num_simulations = -1
+def create_images(path, n, k, c, t, l):
+    distributions = get_data(path, n, k, c, t, l)
     for distribution in distributions:
-        num_simulations = max(num_simulations, distribution.save_plot())
+        distribution.save_plot()
+    return bool(len(distributions))
 
-    return num
+
+def dump():
+    logs_folder = join(dirname(dirname(realpath('__file__'))), "logs")
+    makedirs(logs_folder, exist_ok=True)
+    simulations = listdir(logs_folder)
+    pattern = re.compile(r"n=(\d+),k=(\d+),c=(\d+%),t=(\d+),l=(\d+)")
+    for simulation in simulations:
+        match = pattern.match(simulation)
+        if match:
+            path = join(logs_folder, simulation)
+            args = match.group(1, 2, 3, 4, 5)
+            created = create_images(path, *args)
+            if created:
+                print("Created images for parameters", simulation)
+            else:
+                print("No data file for parameters", simulation, ", empty folder instead")
 
 
 while True:
-    num = dump()
-    print("Made a dump for", num, "simulations")
+    print("\rMaking a dump now...")
+    dump()
+    print("\rSuccessfully made a full gallery")
     time.sleep(15)

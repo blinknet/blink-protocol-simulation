@@ -57,13 +57,6 @@ int main(int argc, char* argv[]) {
     ReadData();
 
     std::ofstream log_file(GetLogFilePath().c_str());
-    std::cout << GetLogFilePath() << std::endl;
-    log_file << num_nodes << ","
-             << gossip_factor << ","
-             << corruption_chance * 100 << "%,"
-             << computing_time << ","
-             << latency
-             << std::endl;
 
     std::vector<double> total(num_nodes);
     std::vector<int> times_reached(num_nodes);
