@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(liquidity_sim)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 file(GLOB SOURCE_FILES src/*.cpp)
 file(GLOB AUTOJSON_FILES src/third_party/autojson/src/lib/*.cpp src/third_party/autojson/src/lib/*.hpp)
