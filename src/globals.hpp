@@ -19,6 +19,4 @@ extern std::vector<Node> nodes;
 
 extern std::string citiesFilePath;
 
-ewqewqewq
-
 #endif // GLOBALS_HPP
