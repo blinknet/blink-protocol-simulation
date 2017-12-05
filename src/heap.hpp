@@ -1,40 +1,43 @@
-#pragma once
+#ifndef HEAP_HPP
+#define HEAP_HPP
 
 #include <vector>
 
 class DijkstraHeap {
-private:
+  private:
     std::vector<std::pair<double, int>> heap;
     std::vector<int> position;
 
     // Neighbour related queries
-    int Parent(const int &index) const;
-    int LeftSon(const int &index) const;
-    int RightSon(const int &index) const;
-    bool HasLeftSon(const int &index) const;
-    bool HasRightSon(const int &index) const;
-    bool IsLeaf(const int &index) const;
+    int parent(const int &index) const;
+    int leftSon(const int &index) const;
+    int rightSon(const int &index) const;
+    bool hasLeftSon(const int &index) const;
+    bool hasRightSon(const int &index) const;
+    bool isLeaf(const int &index) const;
 
     // Own heap-node related queries (fail if index is outside heap size)
-    double GetKey(const int &index) const;
-    int GetNodeIndex(const int &index) const;
+    double getKey(const int &index) const;
+    int getNodeIndex(const int &index) const;
 
     // Methods that change the heap's structure
-    void SwapNodes(const int &index1, const int &index2);
-    void Sift(int index);
-    void Percolate(int index);
+    void swapNodes(const int &index1, const int &index2);
+    void sift(int index);
+    void percolate(int index);
 
-public:
+  public:
     DijkstraHeap();
-    DijkstraHeap(int num_nodes);
+    DijkstraHeap(int numNodes);
 
     // API
 
     // This function either adds the node to the heap if it didn't exist or changes its key if it does.
     // It is tuned for the Dijkstra algorithm, so only decrease in key is supported.
-    void Push(const double &key, const int &node_index);
+    void push(const double &key, const int &nodeIndex);
 
-    int Pop();
+    int pop();
 
-    bool Empty() const;
+    bool empty() const;
 };
+
+#endif  // HEAP_HPP

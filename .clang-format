@@ -1,0 +1,25 @@
+BasedOnStyle: Google
+Standard: Cpp11
+Language: Cpp
+
+ColumnLimit: 180
+IndentWidth: 4
+AccessModifierOffset: -2
+ConstructorInitializerIndentWidth: 6
+SpacesBeforeTrailingComments: 1
+UseTab: Never
+
+SortIncludes: true
+
+PointerAlignment: Left
+
+AlignOperands: true
+AlignTrailingComments: true
+
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+ConstructorInitializerAllOnOneLineOrOnePerLine: true

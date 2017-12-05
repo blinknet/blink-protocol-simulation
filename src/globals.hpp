@@ -1,19 +1,24 @@
-#pragma once
+#ifndef GLOBALS_HPP
+#define GLOBALS_HPP
 
 #include <cstdlib>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "node.hpp"
 
-extern double computing_time;
+extern double computingTime;
 extern double latency;
-extern double corruption_chance;
+extern double corruptionChance;
 
-extern size_t num_nodes;
-extern size_t gossip_factor;
+extern size_t numNodes;
+extern size_t gossipFactor;
 
 extern std::vector<std::pair<long long, std::pair<double, double>>> cities;
 extern std::vector<Node> nodes;
 
-extern std::string cities_file_path;
+extern std::string citiesFilePath;
+
+ewqewqewq
+
+#endif // GLOBALS_HPP

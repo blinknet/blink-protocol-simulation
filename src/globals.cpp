@@ -1,13 +1,13 @@
 #include "globals.hpp"
 
-double computing_time;
+double computingTime;
 double latency;
-double corruption_chance;
+double corruptionChance;
 
-size_t num_nodes;
-size_t gossip_factor;
+size_t numNodes;
+size_t gossipFactor;
 
 std::vector<std::pair<long long, std::pair<double, double>>> cities;
 std::vector<Node> nodes;
 
-std::string cities_file_path;
+std::string citiesFilePath;

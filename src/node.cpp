@@ -1,44 +1,46 @@
 #include "node.hpp"
 
-#include "utils.hpp"
 #include "globals.hpp"
+#include "utils.hpp"
+
+#include "third_party/cpp-base/src/Random.hpp"
 
 Node::Node() {
-    this->Init(0);
+    this->init(0);
 }
 
 Node::Node(int index) {
-    this->Init(index);
+    this->init(index);
 }
 
-void Node::Init(int index) {
+void Node::init(int index) {
     const auto city = RandomCity();
     this->longitude = DegToRad(city.second.first);
     this->latitude = DegToRad(city.second.second);
-    this->SetCorrupt(corruption_chance);
+    this->setCorrupt(corruptionChance);
     this->index = index;
 }
 
-void Node::Reset(const double &corruption_chance) {
+void Node::reset(const double &corruptionChance) {
     const auto city = RandomCity();
     this->longitude = DegToRad(city.second.first);
     this->latitude = DegToRad(city.second.second);
-    this->SetCorrupt(corruption_chance);
+    this->setCorrupt(corruptionChance);
 }
 
-bool Node::IsCorrupt() const {
+bool Node::isCorrupt() const {
     return this->corrupt;
 }
 
-void Node::SetCorrupt(const double &chance) {
-    this->corrupt = Rand01() <= chance;
+void Node::setCorrupt(const double &chance) {
+    this->corrupt = (base::RandFloat64() < chance);
 }
 
-double Node::SphereDistance(const Node &other) const {
+double Node::sphereDistance(const Node &other) const {
     return acos(sin(longitude) * sin(other.longitude) + cos(longitude) * cos(other.longitude) * cos(fabs(latitude - other.latitude)));
 }
 
-double Node::BroadcastDuration(const Node &other) const {
-    const double dist = this->SphereDistance(other);
-    return (computing_time + latency * dist) * LatencyDistribution();
+double Node::broadcastDuration(const Node &other) const {
+    const double dist = this->sphereDistance(other);
+    return (computingTime + latency * dist) * LatencyDistribution();
 }

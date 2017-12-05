@@ -4,76 +4,73 @@
 // Constructors
 DijkstraHeap::DijkstraHeap() = default;
 
-DijkstraHeap::DijkstraHeap(int num_nodes) {
-    this->heap.reserve(num_nodes);
-    this->position.assign(num_nodes, -1);
+DijkstraHeap::DijkstraHeap(int numNodes) {
+    this->heap.reserve(numNodes);
+    this->position.assign(numNodes, -1);
 }
 
-
 // Neighbour query methods
-int DijkstraHeap::Parent(const int &index) const {
+int DijkstraHeap::parent(const int &index) const {
     return (index - 1) / 2;
 }
 
-int DijkstraHeap::LeftSon(const int &index) const {
+int DijkstraHeap::leftSon(const int &index) const {
     return 2 * index + 1;
 }
 
-int DijkstraHeap::RightSon(const int &index) const {
+int DijkstraHeap::rightSon(const int &index) const {
     return 2 * index + 2;
 }
 
-bool DijkstraHeap::HasLeftSon(const int &index) const {
-    return this->LeftSon(index) < this->heap.size();
+bool DijkstraHeap::hasLeftSon(const int &index) const {
+    return this->leftSon(index) < (int)this->heap.size();
 }
 
-bool DijkstraHeap::HasRightSon(const int &index) const {
-    return this->RightSon(index) < this->heap.size();
+bool DijkstraHeap::hasRightSon(const int &index) const {
+    return this->rightSon(index) < (int)this->heap.size();
 }
 
-bool DijkstraHeap::IsLeaf(const int &index) const {
-    return !this->HasLeftSon(index);
+bool DijkstraHeap::isLeaf(const int &index) const {
+    return !this->hasLeftSon(index);
 }
-
 
 // Own heap node queries
-double DijkstraHeap::GetKey(const int &index) const {
+double DijkstraHeap::getKey(const int &index) const {
     return this->heap[index].first;
 }
 
-int DijkstraHeap::GetNodeIndex(const int &index) const {
+int DijkstraHeap::getNodeIndex(const int &index) const {
     return this->heap[index].second;
 }
 
-
 // Methods that modify the heap structure
-void DijkstraHeap::SwapNodes(const int &index1, const int &index2) {
-    this->position[this->GetNodeIndex(index1)] = index2;
-    this->position[this->GetNodeIndex(index2)] = index1;
+void DijkstraHeap::swapNodes(const int &index1, const int &index2) {
+    this->position[this->getNodeIndex(index1)] = index2;
+    this->position[this->getNodeIndex(index2)] = index1;
     std::swap(this->heap[index1], this->heap[index2]);
 }
 
-void DijkstraHeap::Sift(int index) {
-    while (index > 0 && this->GetKey(index) < this->GetKey(this->Parent(index))) {
-        this->SwapNodes(index, this->Parent(index));
-        index = this->Parent(index);
+void DijkstraHeap::sift(int index) {
+    while (index > 0 && this->getKey(index) < this->getKey(this->parent(index))) {
+        this->swapNodes(index, this->parent(index));
+        index = this->parent(index);
     }
 }
 
-void DijkstraHeap::Percolate(int index) {
-    while (!this->IsLeaf(index)) {
-        int son_with_lowest_key = this->LeftSon(index);
-        double son_lowest_key = this->GetKey(son_with_lowest_key);
-        if (this->HasRightSon(index)) {
-            double right_son_key = this->GetKey(this->RightSon(index));
-            if (right_son_key < son_lowest_key) {
-                son_with_lowest_key = this->RightSon(index);
-                son_lowest_key = right_son_key;
+void DijkstraHeap::percolate(int index) {
+    while (!this->isLeaf(index)) {
+        int sonWithLowestKey = this->leftSon(index);
+        double sonLowestKey = this->getKey(sonWithLowestKey);
+        if (this->hasRightSon(index)) {
+            double rightSonKey = this->getKey(this->rightSon(index));
+            if (rightSonKey < sonLowestKey) {
+                sonWithLowestKey = this->rightSon(index);
+                sonLowestKey = rightSonKey;
             }
         }
-        if (son_lowest_key < this->GetKey(index)) {
-            this->SwapNodes(index, son_with_lowest_key);
-            index = son_with_lowest_key;
+        if (sonLowestKey < this->getKey(index)) {
+            this->swapNodes(index, sonWithLowestKey);
+            index = sonWithLowestKey;
         } else {
             break;
         }
@@ -82,35 +79,35 @@ void DijkstraHeap::Percolate(int index) {
 
 
 // API
-void DijkstraHeap::Push(const double &key, const int &node_index) {
-    if (this->position[node_index] != -1) {
+void DijkstraHeap::push(const double &key, const int &nodeIndex) {
+    if (this->position[nodeIndex] != -1) {
         // We already have it, change its key
-        this->heap[this->position[node_index]].first = key;
-        // Now Sift it up from where it is until the heap is valid again
-        this->Sift(this->position[node_index]);
+        this->heap[this->position[nodeIndex]].first = key;
+        // Now sift it up from where it is until the heap is valid again
+        this->sift(this->position[nodeIndex]);
 
         return;
     }
     // We don't have this node, add it to the heap
-    this->position[node_index] = this->heap.size();
-    this->heap.push_back({key, node_index});
-    // Sift it up
-    this->Sift(this->position[node_index]);
+    this->position[nodeIndex] = this->heap.size();
+    this->heap.push_back({key, nodeIndex});
+    // sift it up
+    this->sift(this->position[nodeIndex]);
 }
 
-int DijkstraHeap::Pop() {
-    int return_node_index = this->heap[0].second;
+int DijkstraHeap::pop() {
+    int returnNodeIndex = this->heap[0].second;
 
-    this->SwapNodes(0, this->heap.size() - 1);
-    this->position[return_node_index] = -1;
+    this->swapNodes(0, this->heap.size() - 1);
+    this->position[returnNodeIndex] = -1;
     this->heap.pop_back();
 
-    // Percolate down the node from the root
-    this->Percolate(0);
+    // percolate down the node from the root
+    this->percolate(0);
 
-    return return_node_index;
+    return returnNodeIndex;
 }
 
-bool DijkstraHeap::Empty() const {
+bool DijkstraHeap::empty() const {
     return this->heap.empty();
 }

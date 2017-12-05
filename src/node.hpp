@@ -1,22 +1,25 @@
-#pragma once
+#ifndef NODE_HPP
+#define NODE_HPP
 
 class Node {
-private:
+  private:
     double longitude, latitude;
     bool corrupt;
     int index;
 
-    void Init(int index);
+    void init(int index);
 
-public:
+  public:
     Node();
     Node(int index);
 
-    void Reset(const double &corruption_chance);
+    void reset(const double &corruptionChance);
 
-    bool IsCorrupt() const;
-    void SetCorrupt(const double &chance);
+    bool isCorrupt() const;
+    void setCorrupt(const double &chance);
 
-    double SphereDistance(const Node &other) const;
-    double BroadcastDuration(const Node &other) const;
+    double sphereDistance(const Node &other) const;
+    double broadcastDuration(const Node &other) const;
 };
+
+#endif  // NODE_HPP

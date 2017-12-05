@@ -3,4 +3,4 @@
 
 void ReadData();
 
-#endif
+#endif  // INPUT_HPP
