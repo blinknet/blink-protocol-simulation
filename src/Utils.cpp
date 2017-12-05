@@ -51,17 +51,17 @@ std::string GetLogFolderName() {
     return folderName;
 }
 
+
+std::string GetLogFolderPath() {
+    std::string folderPath = logsRootFolderPath;
+    if (folderPath[folderPath.size() - 1] != '/') {
+        folderPath += "/";
+    }
+    return folderPath + GetLogFolderName() + "/";
+}
+
+
 // Log file path, relative to project root
 std::string GetLogFilePath() {
-    std::vector<std::string> folders = {
-            "logs",
-            GetLogFolderName()
-    };
-
-    std::string path;
-    for (const auto &folder : folders) {
-        path += folder + "/";
-    }
-    path += "data.csv";
-    return path;
+    return GetLogFolderPath() + "data.csv";
 }

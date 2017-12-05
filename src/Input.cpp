@@ -9,6 +9,7 @@
 #include "third_party/autojson/src/lib/json.hpp"
 
 const std::string kDefaultCitiesFilePath = "data/cities.txt";
+const std::string kDefaultLogsRootFolderPath = "logs/";
 const int kDefautNumNodes = 10000;
 const int kDefaultGossipFactor = 16;
 const double kDefaultCorruptionChance = 0.1;
@@ -17,9 +18,10 @@ const double kLatency = 100;
 
 void ReadData() {
     /// read JSON from file
-    AutoJson::Json config = AutoJson::Json::ReadFromFile("data/config.json");
+    AutoJson::Json config = AutoJson::Json::ReadFromFile("../data/config.json");
 
     citiesFilePath = (config["citiesFilePath"] | kDefaultCitiesFilePath).operator std::string();
+    logsRootFolderPath = (config["logsRootFolder"] | kDefaultLogsRootFolderPath).operator std::string();
     numNodes = config["numNodes"] | kDefautNumNodes;
     gossipFactor = config["gossipFactor"] | kDefaultGossipFactor;
     corruptionChance = config["corruptionChance"] | kDefaultCorruptionChance;

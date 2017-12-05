@@ -11,3 +11,4 @@ std::vector<std::pair<long long, std::pair<double, double>>> cities;
 std::vector<Node> nodes;
 
 std::string citiesFilePath;
+std::string logsRootFolderPath;

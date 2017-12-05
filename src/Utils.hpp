@@ -1,9 +1,15 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#pragma once
 
-#include <algorithm>
 #include <cmath>
 #include <cstdlib>
+
+#include <algorithm>
+#include <string>
+#include <utility>
+
+double Rand01();
+
+int RandInt(int limit);
 
 int PoissonNumber();
 
@@ -13,6 +19,5 @@ std::pair<long long, std::pair<double, double>> RandomCity();
 
 double DegToRad(double deg);
 
+std::string GetLogFolderPath();
 std::string GetLogFilePath();
-
-#endif  // UTILS_HPP

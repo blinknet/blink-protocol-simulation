@@ -18,5 +18,6 @@ extern std::vector<std::pair<long long, std::pair<double, double>>> cities;
 extern std::vector<Node> nodes;
 
 extern std::string citiesFilePath;
+extern std::string logsRootFolderPath;
 
 #endif // GLOBALS_HPP

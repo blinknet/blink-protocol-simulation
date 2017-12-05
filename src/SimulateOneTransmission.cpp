@@ -12,6 +12,7 @@
 #include "Utils.hpp"
 
 #include "third_party/cpp-base/src/Random.hpp"
+#include "third_party/cpp-base/src/Os.hpp"
 
 void chooseTargets(int node, std::vector<int> &targets, std::vector<bool> &used) {
     used[node] = true;
@@ -59,18 +60,22 @@ void RunSimulation(std::vector<double> &dist, const std::vector<Node> &nodes) {
 int main(int argc, char *argv[]) {
     ReadData();
 
-    std::ofstream logFile(GetLogFilePath().c_str());
+    base::MakeDir(GetLogFolderPath());
+    std::string logFilePath = GetLogFilePath();
+    base::Touch(logFilePath);
+
+    std::ofstream logFile(logFilePath.c_str(), std::ofstream::app);
 
     std::vector<double> total(numNodes);
     std::vector<int> timesReached(numNodes);
 
     std::vector<std::pair<std::pair<int, std::string>, bool>> percents = {
-            {{ 0.5 * numNodes - 1,  "50%"}, false},
-            {{0.66 * numNodes - 1,  "66%"}, false},
-            {{0.75 * numNodes - 1,  "75%"}, false},
-            {{0.90 * numNodes - 1,  "90%"}, false},
-            {{0.99 * numNodes - 1,  "99%"}, false},
-            {{       numNodes - 1, "100%"}, false}
+        {{0.5 * numNodes - 1, "50%"}, false},  //
+        {{0.66 * numNodes - 1, "66%"}, false}, //
+        {{0.75 * numNodes - 1, "75%"}, false}, //
+        {{0.90 * numNodes - 1, "90%"}, false}, //
+        {{0.99 * numNodes - 1, "99%"}, false}, //
+        {{numNodes - 1, "100%"}, false}        //
     };
 
     double totalTime = 0;
@@ -83,7 +88,11 @@ int main(int argc, char *argv[]) {
 
         double startTime = clock();
         RunSimulation(current, nodes);
-        totalTime += (clock() - startTime) / CLOCKS_PER_SEC;
+        double currentRoundTime = (clock() - startTime) / CLOCKS_PER_SEC;
+
+        bool logToConsole = ((int)(totalTime / 20) != (int)((totalTime + currentRoundTime) / 20));
+
+        totalTime += currentRoundTime;
 
         for (size_t i = 0; i < numNodes; ++i) {
             if (current[i] < 1e20) {
@@ -92,7 +101,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        if (steps % 20 == 0) {
+        if (logToConsole) {
             std::cout << "Number of nodes: " << numNodes << "\n";
             std::cout << "GossipFactor: " << gossipFactor << "\n";
             std::cout << "Chance for a node to be not transmit: " << corruptionChance << "\n";
@@ -105,7 +114,7 @@ int main(int argc, char *argv[]) {
         bool first = true;
         for (auto &percent : percents) {
             const int index = percent.first.first;
-            if (steps % 20 == 0) {
+            if (logToConsole) {
                 std::cout << percent.first.second << ": " << total[index] / timesReached[index] << "ms";
                 std::cout << ", reached this " << 100.0 * timesReached[index] / steps << "% of the time\n";
             }
@@ -120,8 +129,8 @@ int main(int argc, char *argv[]) {
         }
         logFile << "\n";
         logFile.flush();
-        if (steps % 20 == 0) {
-            std::cout << "A full report can be found in transmission.csv" << std::endl;
+        if (logToConsole) {
+            std::cout << "A full report can be found in " << logFilePath << std::endl;
             std::cout << std::endl;
         }
     }
