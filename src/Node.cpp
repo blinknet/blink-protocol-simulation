@@ -1,7 +1,7 @@
-#include "node.hpp"
+#include "Node.hpp"
 
-#include "globals.hpp"
-#include "utils.hpp"
+#include "Globals.hpp"
+#include "Utils.hpp"
 
 #include "third_party/cpp-base/src/Random.hpp"
 

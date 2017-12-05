@@ -1,11 +1,11 @@
-#include "heap.hpp"
+#include "Heap.hpp"
 
 
 // Constructors
 DijkstraHeap::DijkstraHeap() = default;
 
 DijkstraHeap::DijkstraHeap(int numNodes) {
-    this->heap.reserve(numNodes);
+    this->heap.reserve((unsigned int)numNodes);
     this->position.assign(numNodes, -1);
 }
 
@@ -89,7 +89,7 @@ void DijkstraHeap::push(const double &key, const int &nodeIndex) {
         return;
     }
     // We don't have this node, add it to the heap
-    this->position[nodeIndex] = this->heap.size();
+    this->position[nodeIndex] = (int)this->heap.size();
     this->heap.push_back({key, nodeIndex});
     // sift it up
     this->sift(this->position[nodeIndex]);
@@ -98,7 +98,7 @@ void DijkstraHeap::push(const double &key, const int &nodeIndex) {
 int DijkstraHeap::pop() {
     int returnNodeIndex = this->heap[0].second;
 
-    this->swapNodes(0, this->heap.size() - 1);
+    this->swapNodes(0, (int)this->heap.size() - 1);
     this->position[returnNodeIndex] = -1;
     this->heap.pop_back();
 

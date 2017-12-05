@@ -11,7 +11,7 @@ class Node {
 
   public:
     Node();
-    Node(int index);
+    explicit Node(int index);
 
     void reset(const double &corruptionChance);
 

@@ -1,10 +1,10 @@
-#include "input.hpp"
+#include "Input.hpp"
 
 #include <fstream>
 #include <iostream>
 #include <vector>
 
-#include "globals.hpp"
+#include "Globals.hpp"
 
 #include "third_party/autojson/src/lib/json.hpp"
 
@@ -55,6 +55,6 @@ void ReadData() {
     std::cout << "Finished reading cities..." << std::endl;
 
     for (size_t i = 0; i < numNodes; ++i) {
-        nodes.push_back(Node(i));
+        nodes.emplace_back(Node((int)i));
     }
 }

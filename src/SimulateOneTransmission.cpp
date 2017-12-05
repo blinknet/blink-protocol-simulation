@@ -5,11 +5,11 @@
 #include <iostream>
 #include <vector>
 
-#include "globals.hpp"
-#include "heap.hpp"
-#include "input.hpp"
-#include "node.hpp"
-#include "utils.hpp"
+#include "Globals.hpp"
+#include "Heap.hpp"
+#include "Input.hpp"
+#include "Node.hpp"
+#include "Utils.hpp"
 
 #include "third_party/cpp-base/src/Random.hpp"
 

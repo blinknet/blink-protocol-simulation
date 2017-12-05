@@ -27,7 +27,7 @@ class DijkstraHeap {
 
   public:
     DijkstraHeap();
-    DijkstraHeap(int numNodes);
+    explicit DijkstraHeap(int numNodes);
 
     // API
 

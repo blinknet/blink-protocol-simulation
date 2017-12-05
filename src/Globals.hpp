@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "node.hpp"
+#include "Node.hpp"
 
 extern double computingTime;
 extern double latency;

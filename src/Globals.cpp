@@ -1,4 +1,4 @@
-#include "globals.hpp"
+#include "Globals.hpp"
 
 double computingTime;
 double latency;
