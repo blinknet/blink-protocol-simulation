@@ -1,0 +1,22 @@
+#!/bin/bash
+git submodule update --init --recursive
+
+git submodule foreach --recursive -q '
+#!/bin/bash
+branch="$(git config -f $toplevel/.gitmodules submodule.$name.branch)";
+if [ "$branch" = "" ]; then
+    branch="master";
+fi
+
+branchhash="$(git rev-parse $branch)";
+originbranchhash="$(git rev-parse origin/$branch)";
+
+if [ "$branchhash" = "$sha1" ]; then
+    git checkout -q $branch;
+    echo "Checked out branch $branch from submodule $name";
+elif [ "$originbranchhash" = "$sha1" ]; then
+    git checkout -q $branch;
+    git pull;
+    echo "Checked out branch(and pulled) $branch from submodule $name";
+fi  
+'
