@@ -3,7 +3,7 @@
 #include "Globals.hpp"
 #include "Utils.hpp"
 
-#include "third_party/cpp-base/src/Random.hpp"
+#include "third_party/cpp-base/src/cppbase/Random.hpp"
 
 Node::Node() {
     this->init(0);

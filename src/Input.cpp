@@ -6,7 +6,7 @@
 
 #include "Globals.hpp"
 
-#include "third_party/autojson/src/lib/json.hpp"
+#include "third_party/autojson/include/JSON.hpp"
 
 const std::string kDefaultCitiesFilePath = "data/cities.txt";
 const std::string kDefaultLogsRootFolderPath = "logs/";
@@ -18,7 +18,7 @@ const double kLatency = 100;
 
 void ReadData() {
     /// read JSON from file
-    AutoJson::Json config = AutoJson::Json::ReadFromFile("../data/config.json");
+    autojson::JSON config = autojson::JSON::readFromFile("../data/config.json");
 
     citiesFilePath = (config["citiesFilePath"] | kDefaultCitiesFilePath).operator std::string();
     logsRootFolderPath = (config["logsRootFolder"] | kDefaultLogsRootFolderPath).operator std::string();

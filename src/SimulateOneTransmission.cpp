@@ -11,8 +11,8 @@
 #include "Node.hpp"
 #include "Utils.hpp"
 
-#include "third_party/cpp-base/src/Random.hpp"
-#include "third_party/cpp-base/src/Os.hpp"
+#include "third_party/cpp-base/src/cppbase/Random.hpp"
+#include "third_party/cpp-base/src/cppbase/OS.hpp"
 
 void chooseTargets(int node, std::vector<int> &targets, std::vector<bool> &used) {
     used[node] = true;
