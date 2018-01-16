@@ -6,6 +6,9 @@ import time
 
 import matplotlib.pyplot as plt
 
+from matplotlib import rcParams
+rcParams['axes.titlepad'] = 17
+rcParams['axes.titlesize'] = 10
 
 class Distribution:
     def __init__(self, path):
@@ -30,7 +33,7 @@ class Distribution:
         self.percent = percent
 
     def get_title(self):
-        return "n=" + self.num_nodes + ", k=" + self.gossip_factor + ", corrupt=" + self.corrupt + ", delay=" + self.delay + "ms, ping=" + self.latency + "ms" + ",r=" + self.percent
+        return self.num_nodes + " nodes, Gossip=" + self.gossip_factor + ", FailRate=" + self.corrupt + ", Processing=" + self.delay + "ms, Reach=" + self.percent
 
     def get_file_name(self):
         return self.get_title()
@@ -38,10 +41,13 @@ class Distribution:
     def save_plot(self):
         num_samples = str(len(self.samples))
 
+        if len(self.samples) == 0:
+            return num_samples
+
         plt.hist(self.samples, list(range(int(min(self.samples)) - 5, int(max(self.samples)) + 10)))
 
-        plt.xlabel('Avg Time')
-        plt.ylabel('Number of simulations (total=' + num_samples + ')')
+        plt.xlabel('Avg Time (ms)')
+        plt.ylabel('Number of simulations (Out of a total of ' + num_samples + ')')
         plt.title(self.get_title())
 
         # plt.axis([min(samples) - 5, max(samples) + 5, 0, 100])
@@ -54,20 +60,22 @@ class Distribution:
 
 
 def get_data(path, n, k, c, t, l):
+    reach_enumeration=["50%", "66%", "75%", "90%", "99%", "99.9%", "100.0%"]
+
     file_path = join(path, "data.csv")
     try:
         f = open(file_path, "r")
     except:
         return []
     reader = csv.reader(f, delimiter=",")
-    distributions = [Distribution(path) for _ in range(6)]
+    distributions = [Distribution(path) for _ in range(len(reach_enumeration))]
     for i, row in enumerate(reader):
-        for j in range(6):
+        for j in range(len(reach_enumeration)):
             try:
                 distributions[j].add(float(row[j]))
             except:
                 pass
-    for i, percent in enumerate(["50%", "66%", "75%", "90%", "99%", "100%"]):
+    for i, percent in enumerate(reach_enumeration):
         distributions[i].set_title_parts(n, k, c, t, l, percent)
     return distributions
 

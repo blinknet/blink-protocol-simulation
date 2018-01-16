@@ -18,7 +18,7 @@ const double kLatency = 100;
 
 void ReadData() {
     /// read JSON from file
-    autojson::JSON config = autojson::JSON::readFromFile("../data/config.json");
+    autojson::JSON config = autojson::JSON::readFromFile("./data/config.json");
 
     citiesFilePath = (config["citiesFilePath"] | kDefaultCitiesFilePath).operator std::string();
     logsRootFolderPath = (config["logsRootFolder"] | kDefaultLogsRootFolderPath).operator std::string();

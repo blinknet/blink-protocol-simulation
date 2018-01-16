@@ -1,0 +1,9 @@
+{
+  "citiesFilePath": "./data/cities.txt",
+  "logsRootFolder": "./logs/",
+  "numNodes": 100000,
+  "gossipFactor": 16,
+  "corruptionChance": 0.05,
+  "computingTime": 20,
+  "latency": 100
+}

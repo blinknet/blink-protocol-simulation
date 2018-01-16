@@ -9,7 +9,7 @@ blitz_simulation.cbp
 cmake-build-debug/
 cmake-build/
 
-data/
+data/cities.txt
 
 # Linux
 CMakeFiles/

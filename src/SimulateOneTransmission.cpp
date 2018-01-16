@@ -70,12 +70,13 @@ int main(int argc, char *argv[]) {
     std::vector<int> timesReached(numNodes);
 
     std::vector<std::pair<std::pair<int, std::string>, bool>> percents = {
-        {{0.5 * numNodes - 1, "50%"}, false},  //
-        {{0.66 * numNodes - 1, "66%"}, false}, //
-        {{0.75 * numNodes - 1, "75%"}, false}, //
-        {{0.90 * numNodes - 1, "90%"}, false}, //
-        {{0.99 * numNodes - 1, "99%"}, false}, //
-        {{numNodes - 1, "100%"}, false}        //
+        {{0.5 * numNodes - 1, "50%"}, false},    //
+        {{0.66 * numNodes - 1, "66%"}, false},   //
+        {{0.75 * numNodes - 1, "75%"}, false},   //
+        {{0.90 * numNodes - 1, "90%"}, false},   //
+        {{0.99 * numNodes - 1, "99"}, false},    //
+        {{0.999 * numNodes - 1, "99.9%"}, false},//
+        {{numNodes - 1, "100%"}, false}          //
     };
 
     double totalTime = 0;
