@@ -4,6 +4,8 @@ import csv
 import re
 import time
 
+import matplotlib
+matplotlib.use('SVG')
 import matplotlib.pyplot as plt
 
 from matplotlib import rcParams
@@ -53,7 +55,7 @@ class Distribution:
         # plt.axis([min(samples) - 5, max(samples) + 5, 0, 100])
         plt.grid(True)
 
-        plt.savefig(join(self.path_to_save, self.percent + ".png"))
+        plt.savefig(join(self.path_to_save, self.percent + ".svg"))
         plt.clf()
 
         return num_samples
