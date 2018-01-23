@@ -4,6 +4,9 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <atomic>
+#include <mutex>
+#include <thread>
 
 #include "Globals.hpp"
 #include "Heap.hpp"
@@ -57,6 +60,57 @@ void RunSimulation(std::vector<double> &dist, const std::vector<Node> &nodes) {
     std::sort(dist.begin(), dist.end());
 }
 
+
+std::ofstream logFile;
+std::mutex logFileMutex;
+std::vector<std::pair<std::pair<int, std::string>, bool>> percents;
+std::vector<std::atomic<long long>> total;
+std::vector<std::atomic<int>> timesReached;
+std::atomic<int> numSimulations(0);
+
+
+void StartThreadSafeSimulation() {
+    std::vector<Node> localNodes(nodes.begin(), nodes.end());
+    for (auto &localNode: localNodes) {
+        localNode.reset(corruptionChance);
+    }
+    std::vector<double> currentRun(nodes.size(), 1e20);
+
+    RunSimulation(currentRun, localNodes);
+
+    for (auto &percent : percents) {
+        const int index = percent.first.first;
+        if (currentRun[index] < 1e20) {
+            total[index] += (long long)(currentRun[index] * 1e9);
+            timesReached[index] += 1;
+        }
+    }
+
+    std::lock_guard<std::mutex> lockGuard(logFileMutex);
+    bool first = true;
+    for (auto &percent : percents) {
+        const int index = percent.first.first;
+        if (first) {
+            first = false;
+        } else {
+            logFile << ",";
+        }
+        if (currentRun[index] < 1e20) {
+            logFile << currentRun[index];
+        }
+    }
+    logFile << "\n";
+    logFile.flush();
+    numSimulations += 1;
+}
+
+void ThreadWorker() {
+    while (true) {
+        StartThreadSafeSimulation();
+    }
+}
+
+
 int main(int argc, char *argv[]) {
     ReadData();
 
@@ -64,12 +118,15 @@ int main(int argc, char *argv[]) {
     std::string logFilePath = GetLogFilePath();
     base::Touch(logFilePath);
 
-    std::ofstream logFile(logFilePath.c_str(), std::ofstream::app);
+    logFile = std::ofstream(logFilePath.c_str(), std::ofstream::app);
+    total = std::vector<std::atomic<long long>>(numNodes);
+    timesReached = std::vector<std::atomic<int>>(numNodes);
+    for (int i = 0; i < numNodes; ++ i) {
+        std::atomic_init(&total[i], 0LL);
+        std::atomic_init(&timesReached[i], 0);
+    }
 
-    std::vector<double> total(numNodes);
-    std::vector<int> timesReached(numNodes);
-
-    std::vector<std::pair<std::pair<int, std::string>, bool>> percents = {
+    percents = {
         {{0.5 * numNodes - 1, "50%"}, false},    //
         {{0.66 * numNodes - 1, "66%"}, false},   //
         {{0.75 * numNodes - 1, "75%"}, false},   //
@@ -79,61 +136,34 @@ int main(int argc, char *argv[]) {
         {{numNodes - 1, "100%"}, false}          //
     };
 
-    double totalTime = 0;
+    unsigned int numAvailableThreads = std::thread::hardware_concurrency();
+    std::cout << "Number of available threads: " << numAvailableThreads << "\n";
 
-    for (int steps = 1; steps <= 2e9; ++steps) {
-        std::vector<double> current(numNodes, 1e20);
-        for (size_t i = 0; i < numNodes; ++i) {
-            nodes[i].reset(corruptionChance);
-        }
 
-        double startTime = clock();
-        RunSimulation(current, nodes);
-        double currentRoundTime = (clock() - startTime) / CLOCKS_PER_SEC;
+    std::vector<std::thread*> threads;
 
-        bool logToConsole = ((int)(totalTime / 20) != (int)((totalTime + currentRoundTime) / 20));
+    for (int i = 0; i < numAvailableThreads; ++ i) {
+        std::thread *thread = new std::thread(ThreadWorker);
+        threads.push_back(thread);
+    }
 
-        totalTime += currentRoundTime;
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::seconds(15));
 
-        for (size_t i = 0; i < numNodes; ++i) {
-            if (current[i] < 1e20) {
-                total[i] += current[i];
-                timesReached[i] += 1;
-            }
-        }
+        std::cout << "Total number of simulations: " << numSimulations << "\n";
+        std::cout << "Number of nodes: " << numNodes << "\n";
+        std::cout << "GossipFactor: " << gossipFactor << "\n";
+        std::cout << "Chance for a node to be not transmit: " << corruptionChance << "\n";
+        std::cout << "Computing time for a transmission: " << computingTime << "ms\n";
+        std::cout << "Latency to travel 6,371km (Earth Radius): " << latency << "ms\n";
 
-        if (logToConsole) {
-            std::cout << "Number of nodes: " << numNodes << "\n";
-            std::cout << "GossipFactor: " << gossipFactor << "\n";
-            std::cout << "Chance for a node to be not transmit: " << corruptionChance << "\n";
-            std::cout << "Computing time for a transmission: " << computingTime << "ms\n";
-            std::cout << "Latency to travel 6,371km (Earth Radius): " << latency << "ms\n";
-            std::cout << "Simulation runs: " << steps << "\n";
-            std::cout << "Simulations total run time: " << totalTime << "s\n";
-        }
-
-        bool first = true;
         for (auto &percent : percents) {
             const int index = percent.first.first;
-            if (logToConsole) {
-                std::cout << percent.first.second << ": " << total[index] / timesReached[index] << "ms";
-                std::cout << ", reached this " << 100.0 * timesReached[index] / steps << "% of the time\n";
-            }
-            if (first) {
-                first = false;
-            } else {
-                logFile << ",";
-            }
-            if (current[index] < 1e20) {
-                logFile << current[index];
-            }
+            std::cout << percent.first.second << ": " << total[index] / timesReached[index] / 1e9 << "ms";
+            std::cout << ", reached this " << 100.0 * timesReached[index] / numSimulations << "% of the time\n";
         }
-        logFile << "\n";
-        logFile.flush();
-        if (logToConsole) {
-            std::cout << "A full report can be found in " << logFilePath << std::endl;
-            std::cout << std::endl;
-        }
+        std::cout << "A full report can be found in " << logFilePath << std::endl;
+        std::cout << std::endl;
     }
 
     return 0;

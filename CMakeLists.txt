@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
 project(blitz_simulation)
 
+
+find_package (Threads)
+
 set(CMAKE_CXX_STANDARD 17)
 
 file(GLOB SOURCE_FILES src/*.cpp)
