@@ -63,29 +63,21 @@ void RunSimulation(std::vector<double> &dist, const std::vector<Node> &nodes) {
 
 std::ofstream logFile;
 std::mutex logFileMutex;
-std::vector<std::pair<std::pair<int, std::string>, bool>> percents;
+const std::vector<std::pair<std::pair<int, std::string>, bool>> percents = {
+        {{0.5 * numNodes - 1, "50%"}, false},    //
+        {{0.66 * numNodes - 1, "66%"}, false},   //
+        {{0.75 * numNodes - 1, "75%"}, false},   //
+        {{0.90 * numNodes - 1, "90%"}, false},   //
+        {{0.99 * numNodes - 1, "99"}, false},    //
+        {{0.999 * numNodes - 1, "99.9%"}, false},//
+        {{numNodes - 1, "100%"}, false}          //
+};
 std::vector<std::atomic<long long>> total;
 std::vector<std::atomic<int>> timesReached;
 std::atomic<int> numSimulations(0);
 
 
-void StartThreadSafeSimulation() {
-    std::vector<Node> localNodes(nodes.begin(), nodes.end());
-    for (auto &localNode: localNodes) {
-        localNode.reset(corruptionChance);
-    }
-    std::vector<double> currentRun(nodes.size(), 1e20);
-
-    RunSimulation(currentRun, localNodes);
-
-    for (auto &percent : percents) {
-        const int index = percent.first.first;
-        if (currentRun[index] < 1e20) {
-            total[index] += (long long)(currentRun[index] * 1e9);
-            timesReached[index] += 1;
-        }
-    }
-
+void WriteToLogFile(const std::vector<double> &currentRun) {
     std::lock_guard<std::mutex> lockGuard(logFileMutex);
     bool first = true;
     for (auto &percent : percents) {
@@ -101,13 +93,56 @@ void StartThreadSafeSimulation() {
     }
     logFile << "\n";
     logFile.flush();
+}
+
+
+void UpdateStatistics(const std::vector<double> &currentRun) {
+    for (auto &percent : percents) {
+        const int index = percent.first.first;
+        if (currentRun[index] < 1e20) {
+            total[index] += (long long)(currentRun[index] * 1e9);
+            timesReached[index] += 1;
+        }
+    }
     numSimulations += 1;
+}
+
+
+void StartThreadSafeSimulation() {
+    std::vector<Node> localNodes(nodes.begin(), nodes.end());
+    for (auto &localNode: localNodes) {
+        localNode.reset(corruptionChance);
+    }
+    std::vector<double> currentRun(nodes.size(), 1e20);
+
+    RunSimulation(currentRun, localNodes);
+
+    UpdateStatistics(currentRun);
+    WriteToLogFile(currentRun);
 }
 
 void ThreadWorker() {
     while (true) {
         StartThreadSafeSimulation();
     }
+}
+
+
+void LogStatisticsToConsole(const std::string &logFilePath) {
+    std::cout << "Total number of simulations: " << numSimulations << "\n";
+    std::cout << "Number of nodes: " << numNodes << "\n";
+    std::cout << "GossipFactor: " << gossipFactor << "\n";
+    std::cout << "Chance for a node to be not transmit: " << corruptionChance << "\n";
+    std::cout << "Computing time for a transmission: " << computingTime << "ms\n";
+    std::cout << "Latency to travel 6,371km (Earth Radius): " << latency << "ms\n";
+
+    for (auto &percent : percents) {
+        const int index = percent.first.first;
+        std::cout << percent.first.second << ": " << total[index] / timesReached[index] / 1e9 << "ms";
+        std::cout << ", reached this " << 100.0 * timesReached[index] / numSimulations << "% of the time\n";
+    }
+    std::cout << "A full report can be found in " << logFilePath << std::endl;
+    std::cout << std::endl;
 }
 
 
@@ -126,23 +161,12 @@ int main(int argc, char *argv[]) {
         std::atomic_init(&timesReached[i], 0);
     }
 
-    percents = {
-        {{0.5 * numNodes - 1, "50%"}, false},    //
-        {{0.66 * numNodes - 1, "66%"}, false},   //
-        {{0.75 * numNodes - 1, "75%"}, false},   //
-        {{0.90 * numNodes - 1, "90%"}, false},   //
-        {{0.99 * numNodes - 1, "99"}, false},    //
-        {{0.999 * numNodes - 1, "99.9%"}, false},//
-        {{numNodes - 1, "100%"}, false}          //
-    };
-
-    unsigned int numAvailableThreads = std::thread::hardware_concurrency();
-    std::cout << "Number of available threads: " << numAvailableThreads << "\n";
+    std::cout << "Number of threads to start: " << numThreads << "\n";
 
 
     std::vector<std::thread*> threads;
 
-    for (int i = 0; i < numAvailableThreads; ++ i) {
+    for (int i = 0; i < numThreads; ++ i) {
         std::thread *thread = new std::thread(ThreadWorker);
         threads.push_back(thread);
     }
@@ -150,20 +174,7 @@ int main(int argc, char *argv[]) {
     while (true) {
         std::this_thread::sleep_for(std::chrono::seconds(15));
 
-        std::cout << "Total number of simulations: " << numSimulations << "\n";
-        std::cout << "Number of nodes: " << numNodes << "\n";
-        std::cout << "GossipFactor: " << gossipFactor << "\n";
-        std::cout << "Chance for a node to be not transmit: " << corruptionChance << "\n";
-        std::cout << "Computing time for a transmission: " << computingTime << "ms\n";
-        std::cout << "Latency to travel 6,371km (Earth Radius): " << latency << "ms\n";
-
-        for (auto &percent : percents) {
-            const int index = percent.first.first;
-            std::cout << percent.first.second << ": " << total[index] / timesReached[index] / 1e9 << "ms";
-            std::cout << ", reached this " << 100.0 * timesReached[index] / numSimulations << "% of the time\n";
-        }
-        std::cout << "A full report can be found in " << logFilePath << std::endl;
-        std::cout << std::endl;
+        LogStatisticsToConsole(logFilePath);
     }
 
     return 0;

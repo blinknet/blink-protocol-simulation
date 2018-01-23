@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <thread>
 
 #include "Globals.hpp"
 
@@ -27,6 +28,7 @@ void ReadData() {
     corruptionChance = config["corruptionChance"] | kDefaultCorruptionChance;
     computingTime = config["computingTime"] | kComputingTime;
     latency = config["latency"] | kLatency;
+    numThreads = config["numThreads"] | std::thread::hardware_concurrency();
 
     std::cout << "Reading city list..." << std::endl;
     std::ifstream citiesFile(citiesFilePath.c_str());

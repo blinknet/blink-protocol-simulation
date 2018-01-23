@@ -20,4 +20,6 @@ extern std::vector<Node> nodes;
 extern std::string citiesFilePath;
 extern std::string logsRootFolderPath;
 
+extern size_t numThreads;
+
 #endif // GLOBALS_HPP
