@@ -1,11 +1,21 @@
 from os.path import dirname, realpath, join
 from os import listdir, makedirs
+import sys
 import csv
 import re
 import time
 
+
+use_png = (len(sys.argv) >= 2 and sys.argv[1] == "png")
+def get_extension():
+    if use_png:
+        return ".png"
+    else:
+        return ".svg"
+
 import matplotlib
-matplotlib.use('SVG')
+if not use_png:
+    matplotlib.use('SVG')
 import matplotlib.pyplot as plt
 
 from matplotlib import rcParams
@@ -55,7 +65,7 @@ class Distribution:
         # plt.axis([min(samples) - 5, max(samples) + 5, 0, 100])
         plt.grid(True)
 
-        plt.savefig(join(self.path_to_save, self.percent + ".svg"))
+        plt.savefig(join(self.path_to_save, self.percent + get_extension()))
         plt.clf()
 
         return num_samples
