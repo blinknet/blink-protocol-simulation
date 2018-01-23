@@ -63,15 +63,7 @@ void RunSimulation(std::vector<double> &dist, const std::vector<Node> &nodes) {
 
 std::ofstream logFile;
 std::mutex logFileMutex;
-const std::vector<std::pair<std::pair<int, std::string>, bool>> percents = {
-        {{0.5 * numNodes - 1, "50%"}, false},    //
-        {{0.66 * numNodes - 1, "66%"}, false},   //
-        {{0.75 * numNodes - 1, "75%"}, false},   //
-        {{0.90 * numNodes - 1, "90%"}, false},   //
-        {{0.99 * numNodes - 1, "99"}, false},    //
-        {{0.999 * numNodes - 1, "99.9%"}, false},//
-        {{numNodes - 1, "100%"}, false}          //
-};
+std::vector<std::pair<std::pair<int, std::string>, bool>> percents;
 std::vector<std::atomic<long long>> total;
 std::vector<std::atomic<int>> timesReached;
 std::atomic<int> numSimulations(0);
@@ -148,6 +140,16 @@ void LogStatisticsToConsole(const std::string &logFilePath) {
 
 int main(int argc, char *argv[]) {
     ReadData();
+
+    percents = {
+        {{0.5 * numNodes - 1, "50%"}, false},    //
+        {{0.66 * numNodes - 1, "66%"}, false},   //
+        {{0.75 * numNodes - 1, "75%"}, false},   //
+        {{0.90 * numNodes - 1, "90%"}, false},   //
+        {{0.99 * numNodes - 1, "99"}, false},    //
+        {{0.999 * numNodes - 1, "99.9%"}, false},//
+        {{numNodes - 1, "100%"}, false}          //
+    };
 
     base::MakeDir(GetLogFolderPath());
     std::string logFilePath = GetLogFilePath();
