@@ -163,12 +163,12 @@ int main(int argc, char *argv[]) {
         std::atomic_init(&timesReached[i], 0);
     }
 
-    std::cout << "Number of threads to start: " << numThreads << "\n";
+    std::cout << "Number of worker threads: " << numWorkerThreads << "\n";
 
 
     std::vector<std::thread*> threads;
 
-    for (int i = 0; i < numThreads; ++ i) {
+    for (int i = 0; i < numWorkerThreads; ++ i) {
         std::thread *thread = new std::thread(ThreadWorker);
         threads.push_back(thread);
     }

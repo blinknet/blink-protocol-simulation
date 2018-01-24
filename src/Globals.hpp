@@ -8,7 +8,7 @@
 #include "Node.hpp"
 
 extern double computingTime;
-extern double latency;
+extern double latency; //great name, meaningful
 extern double corruptionChance;
 
 extern size_t numNodes;
@@ -20,6 +20,6 @@ extern std::vector<Node> nodes;
 extern std::string citiesFilePath;
 extern std::string logsRootFolderPath;
 
-extern size_t numThreads;
+extern size_t numWorkerThreads;
 
 #endif // GLOBALS_HPP

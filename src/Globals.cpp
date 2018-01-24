@@ -13,4 +13,4 @@ std::vector<Node> nodes;
 std::string citiesFilePath;
 std::string logsRootFolderPath;
 
-size_t numThreads;
+size_t numWorkerThreads;

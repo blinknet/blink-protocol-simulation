@@ -16,6 +16,7 @@ const int kDefaultGossipFactor = 16;
 const double kDefaultCorruptionChance = 0.1;
 const double kComputingTime = 20;
 const double kLatency = 100;
+const size_t kDefaultNumWorkerThreads = std::thread::hardware_concurrency();
 
 void ReadData() {
     /// read JSON from file
@@ -28,7 +29,7 @@ void ReadData() {
     corruptionChance = config["corruptionChance"] | kDefaultCorruptionChance;
     computingTime = config["computingTime"] | kComputingTime;
     latency = config["latency"] | kLatency;
-    numThreads = config["numThreads"] | std::thread::hardware_concurrency();
+    numWorkerThreads = config["numThreads"] | kDefaultNumWorkerThreads;
 
     std::cout << "Reading city list..." << std::endl;
     std::ifstream citiesFile(citiesFilePath.c_str());
